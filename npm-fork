@@ -1,0 +1,39 @@
+#!/bin/bash
+
+VERSION="0.1"
+
+function testHas(){
+    local path=`which ${1} 2> /dev/null`
+    if [ -z $path ]; then
+	echo "Can't find \"${1}\" command." >&2
+	echo "\tSee: ${2}." >&2
+	exit 1
+    fi
+}
+
+if [ -z $1 ] || [ "-h" = $1 ] || [ "--help" = $1 ] ; then 
+    echo "Usage: npm-fork PACKAGE"
+    exit 1
+elif [ "-v" = $1 ] || [ "--version" = $1 ]
+    echo "npm-fork version ${VERSION}"
+else
+    PACKAGE=$1
+    testHas "npm" "https://github.com/isaacs/npm"
+    testHas "github" "https://github.com/defunkt/github-gem"
+    REPO=`npm view "${PACKAGE}" repository.url 2> /dev/null | grep github`
+    if [ -z $REPO ]; then 
+	echo "No package named ${PACKAGE} found"
+	exit 1
+    fi
+    if [ ${REPO:0:17} != "git://github.com/" ] || 
+       [ ${REPO: -4}  != ".git" ]; then
+	echo "Unexpected repository format. " >&2
+	echo "\tExpected: git://github.com/{USER}/{PACKAGE}.git" >&2
+	echo "\tGot: ${REPO}" >&2
+	exit 1
+    fi
+    GH_PATH=${REPO:17:-4}
+    echo "Forking [${GH_PATH}]"
+    github fork "${GH_PATH}"
+fi
+
