@@ -31,7 +31,7 @@ else
     if [ -z $REPO ]; then 
 	echo "No github repository for ${PACKAGE} found (or package doesn't exist)."
 	exit 1
-    elif [ ${#REPO} -lt $GH_MIN_REPO_LENGTH ]
+    elif [ ${#REPO} -lt $GH_MIN_REPO_LENGTH ] || 
 	 [ "${REPO:0:$GH_URL_LENGTH}" != "${GH_URL}" ] || 
          [ "${REPO: -4}"  != "${GH_SUFFIX}" ]; then
 	echo "Unexpected repository format. " >&2
@@ -40,7 +40,7 @@ else
 	exit 1
     fi
     GH_PATH=${REPO:$GH_URL_LENGTH:-4}
-    echo "Forking [${GH_PATH}]"
+    echo "Forking and cloning [${GH_PATH}] on GitHub..."
     github fork "${GH_PATH}"
 fi
 
